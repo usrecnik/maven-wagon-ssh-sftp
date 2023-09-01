@@ -56,36 +56,9 @@ public class SftpUtility {
                             .filter((line) -> line.contains(resourceName) && !line.contains("sftp> ls -l "))
                             .forEach((line) -> {
                                 line = line.replace(resourceName, "").trim();
-                                final String dateStr = line.substring(line.length() - "Aug 31 11:49".length());
-                                final String[] dateParts = dateStr.split(" ");
-                                if (dateParts.length != 3) {
-                                    throw new RuntimeException("Unable to parse date string from sftp [" + dateStr + "]");
-                                } else {
-                                    final String month = dateParts[0];
-                                    final String day = dateParts[1];
-                                    final String year;
-                                    final String hour;
-                                    final String minute;
-                                    if (dateParts[2].contains(":")) {
-                                        year = "" + Year.now().getValue();
-                                        hour = dateParts[2].substring(0, dateParts[2].indexOf(":"));
-                                        minute = dateParts[2].substring(dateParts[2].indexOf(":") + 1);
-                                    } else {
-                                        year = dateParts[2];
-                                        hour = "01";
-                                        minute = "01";
-                                    }
-
-                                    final String dateFmt = year + "-" + month + "-" + day + " " + hour + ":" + minute;
-                                    final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd HH:mm");
-
-                                    try {
-                                        timestamp[0] = sdf.parse(dateFmt).getTime();
-                                    } catch (Throwable t) {
-                                        throw new RuntimeException("Unable to parse date from string: [" + dateFmt + "].");
-                                    }
-                                }
-                    });
+                                    final String dateStr = line.substring(line.length() - "Aug 31 11:49".length());
+                                    timestamp[0] = parseDate(dateStr);
+                                });
                     return false;
                 }
             });
@@ -156,5 +129,40 @@ public class SftpUtility {
         String stdout;
         String stderr;
         int exitCode;
+    }
+
+    private static long parseDate(String input) {
+        // input examples:
+        // [Sep  1 04:58]
+        // [Aug 31 11:49]
+        // [Sep 20  2019]
+
+        final String[] dateParts = input.split("\\s+");
+        if (dateParts.length != 3)
+            throw new RuntimeException("Unable to parse date string from sftp [" + input + "]");
+
+        final String month = dateParts[0];
+        final String day = dateParts[1];
+        final String year;
+        final String hour;
+        final String minute;
+        if (dateParts[2].contains(":")) {
+            year = "" + Year.now().getValue();
+            hour = dateParts[2].substring(0, dateParts[2].indexOf(":"));
+            minute = dateParts[2].substring(dateParts[2].indexOf(":") + 1);
+        } else {
+            year = dateParts[2];
+            hour = "01";
+            minute = "01";
+        }
+
+        final String dateFmt = year + "-" + month + "-" + day + " " + hour + ":" + minute;
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd HH:mm");
+
+        try {
+            return sdf.parse(dateFmt).getTime();
+        } catch (Throwable t) {
+            throw new RuntimeException("Unable to parse date from string: [" + dateFmt + "].");
+        }
     }
 }
