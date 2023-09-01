@@ -20,6 +20,9 @@ Thus, my implementation simply relies only on `/usr/bin/sftp`, which works with 
 
 I invite developers of ssh-external to merge or otherwise use this idea or my source code in official ssh-external project.
 
+More info about the issue described is also published here:  
+https://serverfault.com/questions/420457/openssh-anything-like-internal-sftp-but-for-scp
+
 Disclaimer, this code:
 
 * is only tested in my own environment
